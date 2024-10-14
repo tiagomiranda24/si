@@ -2,6 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 from si.metrics.accuracy import accuracy
+from si.metrics.mse import mse
 
 class TestMetrics(TestCase):
 
@@ -11,3 +12,8 @@ class TestMetrics(TestCase):
         y_pred = np.array([0,1,1,1,1,1,0])
 
         self.assertTrue(accuracy(y_true, y_pred)==1)
+
+    def test_mse(self):
+
+        y_true = np.array([])
+        y_pred = 

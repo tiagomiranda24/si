@@ -182,25 +182,8 @@ class KMeans(Transformer, Model):
         """
         return np.apply_along_axis(self._get_closest_centroid, axis=1, arr=dataset.X)
     
-    def _score(self, dataset: Dataset) -> float:
-        """
-        Compute the score of the KMeans model based on the distances to the centroids.
-
-        Parameters
-        ----------
-        dataset: Dataset
-            The dataset used for scoring.
-
-        Returns
-        -------
-        float
-            The score representing the sum of squared distances to the closest centroid.
-        """
-        # Calculate the distances between each point and its assigned centroid
-        distances = self.distance(dataset.X, self.centroids[self.labels.astype(int)])
-        
-        # Return the sum of squared distances as the score
-        return np.sum(distances)
+    def _score(self, dataset, predictions):
+        pass
 
 
 if __name__ == '__main__':
