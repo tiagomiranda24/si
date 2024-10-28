@@ -1,16 +1,14 @@
 from unittest import TestCase
 
-import numpy as np
 from datasets import DATASETS_PATH
 
 import os
-from si.io.csv_file import read_csv
 
 from si.io.data_file import read_data_file
 from si.model_selection.split import train_test_split
-from si.models.logistic_regression import LogisticRegression
+from si.models.decision_tree_classifier import DecisionTreeClassifier
 
-class TestLogisticRegressor(TestCase):
+class TestDecisionTree(TestCase):
 
     def setUp(self):
         self.csv_file = os.path.join(DATASETS_PATH, 'breast_bin', 'breast-bin.csv')
@@ -21,17 +19,15 @@ class TestLogisticRegressor(TestCase):
 
     def test_fit(self):
 
-        ridge = LogisticRegression()
-        ridge.fit(self.train_dataset)
+        decision_tree = DecisionTreeClassifier()
+        decision_tree.fit(self.train_dataset)
 
-        self.assertEqual(ridge.theta.shape[0], self.train_dataset.shape()[1])
-        self.assertNotEqual(ridge.theta_zero, None)
-        self.assertNotEqual(len(ridge.cost_history), 0)
-        self.assertNotEqual(len(ridge.mean), 0)
-        self.assertNotEqual(len(ridge.std), 0)
+        self.assertEqual(decision_tree.min_sample_split, 2)
+        self.assertEqual(decision_tree.max_depth, 10)
+
 
     def test_predict(self):
-        ridge = LogisticRegression()
+        ridge = DecisionTreeClassifier()
         ridge.fit(self.train_dataset)
 
         predictions = ridge.predict(self.test_dataset)
@@ -39,8 +35,8 @@ class TestLogisticRegressor(TestCase):
         self.assertEqual(predictions.shape[0], self.test_dataset.shape()[0])
     
     def test_score(self):
-        ridge = LogisticRegression()
+        ridge = DecisionTreeClassifier()
         ridge.fit(self.train_dataset)
         accuracy_ = ridge.score(self.test_dataset)
 
-        self.assertEqual(round(accuracy_, 2), 0.96)
+        self.assertEqual(round(accuracy_, 2), 0.92)

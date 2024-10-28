@@ -1,15 +1,18 @@
 import numpy as np
 
-def sigmoid_function(x: np.ndarray) -> np.ndarray:
+
+def sigmoid_function(X: np.ndarray) -> np.ndarray:
     """
+    It returns the sigmoid function of the given input
+
     Parameters
     ----------
-    x : np.ndarray
-        Input value(s).
+    X: np.ndarray
+        The input of the sigmoid function
 
     Returns
-    ----------
-    np.ndarray
-        The probability of the values being 1 (sigmoid function).
+    -------
+    sigmoid: np.ndarray
+        The sigmoid function of the given input
     """
-    return 1 / (1 + np.exp(-x))
+    return 1 / (1 + np.exp(-X))
