@@ -58,6 +58,9 @@ class TestKNNRegressor(TestCase):
         # Optionally, you can check that the RMSE is not too large (define a threshold as needed)
         self.assertLess(score, 10) 
 
+    def _score(self):
+        pass
+
 if __name__ == '__main__':
     import unittest
     unittest.main()
