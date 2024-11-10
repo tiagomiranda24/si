@@ -3,7 +3,7 @@ from datasets import DATASETS_PATH
 import os
 from si.io.data_file import read_data_file
 from si.model_selection.split import train_test_split
-from si.models.random_forest_classifier import RandomForestClassifier
+from si.models.random_ import RandomForestClassifier
 
 class TestRandomForestClassifier(TestCase):
 

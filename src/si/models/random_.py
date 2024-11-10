@@ -122,6 +122,41 @@ class RandomForestClassifier(Model):
         
         return self
 
+    def _create_decision_tree(self, dataset: Dataset) -> Node:
+        """
+        Creates and trains a decision tree on the given dataset.
+
+        Parameters
+        ----------
+        dataset: Dataset
+            The dataset to train the decision tree on.
+
+        Returns
+        -------
+        Node
+            The root node of the trained decision tree.
+        """
+        # Calls `_train_decision_tree` to handle tree training logic
+        return self._train_decision_tree(dataset)  # Updated to call the newly defined method
+
+    def _train_decision_tree(self, dataset: Dataset) -> Node:
+        """
+        Trains a decision tree on the given dataset.
+
+        Parameters
+        ----------
+        dataset: Dataset
+            The dataset to train the decision tree.
+
+        Returns
+        -------
+        Node
+            The root node of the trained decision tree.
+        """
+        # Convert labels to integers before using np.bincount
+        labels = dataset.y.astype(int)
+        return Node(value=np.argmax(np.bincount(labels)))
+
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
         Predicts the labels using the ensemble models.
