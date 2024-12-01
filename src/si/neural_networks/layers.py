@@ -95,3 +95,23 @@ class DenseLayer(Layer):
         self.input = input
         self.output = np.dot(self.input, self.weights) + self.biases
         return self.output
+    
+    def backward_propagation(self, error: np.ndarray) -> np.ndarray:    
+        """
+        Perform backward propagation on the given error.
+
+        Parameters
+        ----------
+        error: numpy.ndarray
+            The output error of the layer.
+
+        Returns
+        -------
+        numpy.ndarray
+            The imerror of the layer.
+        """
+        input_error = np.dot(output_error, self.weights.T)
+        weights_error = np.dot(self.input.T, output_error)
+        bias_error = np.sum(output_error, axis=0)
+        self.b_opt.update(bias_error)
+        self.w_opt.update(weights_error)
