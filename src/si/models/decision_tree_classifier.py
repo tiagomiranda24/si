@@ -89,7 +89,8 @@ class DecisionTreeClassifier(Model):
             The root node of the tree.
         """
         n_samples = dataset.shape()[0]
-        if n_samples >= self.min_sample_split and current_depth <= self.max_depth:
+        if n_samples >= self.min_sample_split and (self.max_depth is None or current_depth <= self.max_depth):
+
             best_split = self._get_best_split(dataset)
             if best_split['info_gain'] > 0:
                 left_subtree = self._build_tree(best_split['left_data'], current_depth + 1)
