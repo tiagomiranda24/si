@@ -2,7 +2,7 @@ from unittest import TestCase
 import numpy as np
 from si.io.csv_file import read_csv
 from si.model_selection.split import train_test_split
-from si.models.random_forest_classifier import RandomForestClassifier  # Corrected class import
+from si.models.random_forest_classifier import RandomForestClassifier 
 from si.metrics.accuracy import accuracy
 from si.data.dataset import Dataset
 

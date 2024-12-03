@@ -3,69 +3,74 @@ from typing import Callable, Tuple, Dict, Any
 import numpy as np
 from si.data.dataset import Dataset
 from si.model_selection.cross_validate import k_fold_cross_validation
-from si.models import Model  # Certifique-se de importar a classe ou tipo correto
+from si.base.model import Model
 
-def randomized_search_cv(
-    model: Model, 
-    dataset: Dataset, 
-    hyperparameter_grid: Dict[str, Tuple], 
-    scoring: Callable = None, 
-    cv: int = 5, 
-    n_iter: int = 10  # Adicionando a variável n_iter
-) -> Dict[str, Any]:
+def randomized_search_cv(model: Model, dataset: Dataset, hyperparameter_grid: Dict[str, Tuple], scoring: Callable = None,
+    cv: int = 5, n_iter: int = 10) -> Dict[str, Any]:
     """
-    Realiza uma busca aleatória para seleção de hiperparâmetros usando validação cruzada k-fold.
-    
+    Performs a randomized hyperparameter search using k-fold cross-validation.
+
     Arguments:
-        - model – modelo a ser validado.
-        - dataset – dataset para validação.
-        - hyperparameter_grid - Dicionário com os nomes dos hiperparâmetros e seus valores para pesquisa.
-        - scoring – função para calcular o escore do modelo (opcional, por padrão None).
-        - cv – número de folds para validação cruzada (default é 5).
-        - n_iter – número de combinações aleatórias de hiperparâmetros a testar.
+        - model: The model to be validated.
+        - dataset: The dataset to be used for validation.
+        - hyperparameter_grid: Dictionary where keys are hyperparameter names, 
+          and values are tuples of possible values to search over.
+        - scoring: Function to calculate the model score (optional, default is None).
+        - cv: Number of folds for k-fold cross-validation (default is 5).
+        - n_iter: Number of random hyperparameter combinations to test (default is 10).
 
-    Expected output:
-        - Um dicionário com os resultados da validação cruzada para cada conjunto de hiperparâmetros.
-          Inclui os escores, hiperparâmetros, melhores hiperparâmetros e o melhor escore.
+    Returns:
+        - A dictionary containing cross-validation results for each hyperparameter combination, 
+          including the scores, hyperparameters, best hyperparameters, and the best score.
     """
-    
-    # Lista para armazenar os resultados
-    results = []
 
-    # Gerar as combinações aleatórias dos hiperparâmetros
+    # Validate hyperparameter names
+    for hyperparam in hyperparameter_grid.keys():
+        if not hasattr(model, hyperparam):
+            raise ValueError(f"The hyperparameter '{hyperparam}' is not valid for the provided model.")
+
+    # Generate all possible combinations of hyperparameters
     hyperparameter_combinations = list(itertools.product(*hyperparameter_grid.values()))
-    
-    # Se n_iter for menor que o número total de combinações, sorteia combinações aleatórias
+
+    # If n_iter is less than the total number of combinations, randomly sample combinations
     if n_iter < len(hyperparameter_combinations):
         sampled_combinations = np.random.choice(len(hyperparameter_combinations), n_iter, replace=False)
+        # Select only the sampled combinations
         hyperparameter_combinations = [hyperparameter_combinations[i] for i in sampled_combinations]
-    else:
-        # Caso contrário, usa todas as combinações
-        sampled_combinations = range(len(hyperparameter_combinations))
 
-    # Executa validação cruzada k-fold para cada combinação de hiperparâmetros
+    # List to store the results of the search
+    results = []
+
+    # Perform k-fold cross-validation for each combination of hyperparameters
     for combination in hyperparameter_combinations:
-        # Mapear os valores da combinação para os parâmetros do modelo
+        # Map the current combination of hyperparameter values to their respective names
         hyperparameters = dict(zip(hyperparameter_grid.keys(), combination))
-        model.set_params(**hyperparameters)  # Ajustar o modelo com os hiperparâmetros
 
-        # Aplicar validação cruzada k-fold
+        # Set the model parameters using the current hyperparameter combination
+        for param, value in hyperparameters.items():
+            if hasattr(model, param):
+                setattr(model, param, value)
+            else:
+                raise ValueError(f"Invalid parameter '{param}' for the model.")
+
+        # Apply k-fold cross-validation with the given scoring function
         scores = k_fold_cross_validation(model, dataset, cv=cv, scoring=scoring)
 
-        # Armazenar os resultados
+        # Save the results for the current combination
         results.append({
-            'hyperparameters': hyperparameters,
-            'scores': scores
+            'hyperparameters': hyperparameters,  # Current hyperparameter combination
+            'scores': scores  # Scores from cross-validation
         })
-    
-    # Obter o melhor modelo baseado na pontuação média
+
+    # Determine the best result based on the average score across folds
     best_result = max(results, key=lambda x: np.mean(x['scores']))
+    # Extract the best hyperparameters and their corresponding score
     best_hyperparameters = best_result['hyperparameters']
     best_score = np.mean(best_result['scores'])
 
-    # Retornar os resultados
+    # Return a dictionary with all results and the best configuration
     return {
-        'results': results,
-        'best_hyperparameters': best_hyperparameters,
-        'best_score': best_score
+        'results': results,  
+        'best_hyperparameters': best_hyperparameters,  
+        'best_score': best_score  
     }
