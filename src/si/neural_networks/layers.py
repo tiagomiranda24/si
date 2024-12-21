@@ -142,7 +142,7 @@ class DenseLayer(Layer):
         """
         return (self.n_units,) 
     
-class Dropout(Layer):
+class DropoutLayer(Layer):
     """
     Dropout layer for regularization in neural networks.
     """
