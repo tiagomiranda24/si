@@ -197,6 +197,94 @@ class Dataset:
         X = np.random.rand(n_samples, n_features)
         y = np.random.randint(0, n_classes, n_samples)
         return cls(X, y, features=features, label=label)
+    
+
+    def dropna(self) -> 'ClassType':
+        """
+        Removes rows containing NaN values from X and y.
+
+        Returns
+        -------
+        self : ClassType
+            Returns the object itself after removing NaN rows.
+        """
+        # 1. Identify the rows that do not contain NaN values
+        non_nan_mask = ~np.any(np.isnan(self.X), axis=1)
+
+        # 2. Filter the rows in X that do not have NaN values
+        self.X = self.X[non_nan_mask]
+
+        # 3. Update the y vector by removing the entries corresponding to the removed rows
+        self.y = self.y[non_nan_mask]
+
+        return self
+
+    def fillna(self, value) -> 'ClassType':
+        """
+        Replaces NaN values in X with the specified value.
+
+        Parameters
+        ----------
+        value : str or float
+            If "mean", replaces NaN with the mean of the column.
+            If "median", replaces NaN with the median of the column.
+            If a float, replaces NaN with the specified value.
+
+        Returns
+        -------
+        self : ClassType
+            Returns the object itself after replacing NaN values.
+        """
+        # For each column in X, replace NaN values with the appropriate value
+        for i in range(self.X.shape[1]):
+            if np.any(np.isnan(self.X[:, i])):
+                # If the value is "mean", calculate the mean ignoring NaN
+                if value == "mean":
+                    fill_value = np.nanmean(self.X[:, i])
+                # If the value is "median", calculate the median ignoring NaN
+                elif value == "median":
+                    fill_value = np.nanmedian(self.X[:, i])
+                else:
+                    fill_value = value
+
+                # Replace NaN in column i with the calculated value
+                self.X[:, i] = np.where(np.isnan(self.X[:, i]), fill_value, self.X[:, i])
+
+        return self
+
+    def remove_by_index(self, index: int) -> 'ClassType':
+        """
+        Removes a row from X and y by index.
+
+        Parameters
+        ----------
+        index : int
+            The index of the row to be removed.
+
+        Returns
+        -------
+        self : ClassType
+            Returns the object itself after removing the row.
+        
+        Raises
+        ------
+        IndexError
+            If the index is out of bounds.
+        """
+        # Check if the index is valid
+        if index < 0 or index >= self.X.shape[0]:
+            raise IndexError("Index out of bounds")
+
+        # Create a mask that keeps all rows except the one being removed
+        mask = np.ones(self.X.shape[0], dtype=bool)
+        mask[index] = False
+
+        # Apply the mask to filter X and y
+        self.X = self.X[mask]
+        self.y = self.y[mask]
+
+        return self
+
 
 
 if __name__ == '__main__':
