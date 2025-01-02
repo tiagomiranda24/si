@@ -42,7 +42,7 @@ class SelectPercentile(Transformer):
         
         super().__init__(**kwargs)
         
-        # Adicionando validação para o percentual
+        # Adicionando validação para o percentil
         if not (0 < percentile <= 100):
             raise ValueError("percentile must be in the range (0, 100].")
         
@@ -97,9 +97,6 @@ class SelectPercentile(Transformer):
 
 
 if __name__ == '__main__':
-    from si.data.dataset import Dataset
-
-    # Example dataset
     dataset = Dataset(X=np.array([[0, 2, 0, 3],
                                   [0, 1, 4, 3],
                                   [0, 1, 1, 3]]),
