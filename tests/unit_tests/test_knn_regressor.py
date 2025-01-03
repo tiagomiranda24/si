@@ -11,7 +11,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.neighbors import KNeighborsRegressor
 from math import sqrt
 
-
 class TestKNNRegressor(TestCase):
 
     def setUp(self):

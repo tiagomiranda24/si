@@ -47,6 +47,7 @@ class KNNRegressor(Model):
         self.distance = distance
         self.dataset = None
 
+
     def _fit(self, dataset: Dataset) -> 'KNNRegressor':
         """
         It fits the model to the given dataset
@@ -63,6 +64,7 @@ class KNNRegressor(Model):
         """
         self.dataset = dataset
         return self
+
 
     def _get_closest_values(self, sample: np.ndarray) -> np.ndarray:
         """
@@ -89,8 +91,7 @@ class KNNRegressor(Model):
 
         # Return the target values (y) corresponding to the k nearest neighbors
         return self.dataset.y[k_nearest_neighbors]
-
-
+    
 
     def _predict(self, dataset: Dataset) -> np.ndarray:
         """
@@ -109,6 +110,7 @@ class KNNRegressor(Model):
         # For each sample in the dataset, get the k-nearest target values and calculate the mean
         predictions = np.apply_along_axis(lambda sample: np.mean(self._get_closest_values(sample)), axis=1, arr=dataset.X)
         return predictions
+
 
     def _score(self, dataset: Dataset, predictions: np.ndarray) -> float:
         """
