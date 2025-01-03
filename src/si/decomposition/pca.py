@@ -31,7 +31,7 @@ class PCA(Transformer):
         self: PCA
             The fitted PCA model.
         """
-        # Calculate the mean of each feature (column-wise mean)
+        # Calculate the mean of each feature
         self.mean = np.mean(dataset.X, axis=0)
         
         # Center the data (subtract the mean)
