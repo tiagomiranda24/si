@@ -1,8 +1,5 @@
 from unittest import TestCase
-
 import numpy as np
-
-
 from datasets import DATASETS_PATH
 
 import os

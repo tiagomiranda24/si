@@ -4,6 +4,7 @@ from si.base.model import Model
 from si.data.dataset import Dataset
 from si.metrics.rmse import rmse
 from si.statistics.euclidean_distance import euclidean_distance
+from si.model_selection.split import train_test_split
 
 class KNNRegressor(Model):
     """
@@ -32,7 +33,7 @@ class KNNRegressor(Model):
     """
     def __init__(self, k: int = 1, distance: Callable = euclidean_distance):
         """
-        Initialize the KNN classifier
+        Initialize the KNN regressor
 
         Parameters
         ----------
@@ -130,10 +131,6 @@ class KNNRegressor(Model):
 
 
 if __name__ == '__main__':
-    # Import dataset and train_test_split function
-    from si.data.dataset import Dataset
-    from si.model_selection.split import train_test_split
-
     # Load and split the dataset
     dataset_ = Dataset.from_random(600, 100, 2)
     dataset_train, dataset_test = train_test_split(dataset_, test_size=0.2)

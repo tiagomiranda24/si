@@ -1,4 +1,5 @@
 import numpy as np
+from si.metrics.mse import mse
 
 def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
@@ -20,12 +21,12 @@ def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
     
-    # Compute Mean Squared Error (MSE)
-    mse = np.mean((y_true - y_pred) ** 2)
+    # Compute MSE using the mse function
+    mse_value = mse(y_true, y_pred)
     
     # Compute RMSE by taking the square root of the MSE
-    rmse_value = np.sqrt(mse)
-    
+    rmse_value = np.sqrt(mse_value)
+
     return rmse_value
 
 if __name__ == '__main__':
