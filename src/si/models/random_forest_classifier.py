@@ -161,5 +161,4 @@ if __name__ == '__main__':
     )
     model.fit(train)
 
-    # Evaluate model
     print(f"Model accuracy: {model.score(test):.2f}")

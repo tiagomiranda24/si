@@ -144,9 +144,6 @@ class LassoRegression(Model):
         return mse(dataset.y, predictions)
 
 if __name__ == '__main__':
-    # Import Dataset class
-    from si.data.dataset import Dataset
-
     # Create a sample dataset
     X = np.array([[1, 1], [1, 2], [2, 2], [2, 3]])
     y = np.dot(X, np.array([1, 2])) + 3
