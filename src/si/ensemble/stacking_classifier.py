@@ -3,7 +3,6 @@ from si.base.model import Model
 from si.data.dataset import Dataset
 from si.metrics.accuracy import accuracy
 
-
 class StackingClassifier(Model):
     """
     An ensemble classifier that combines multiple models and uses majority voting 
@@ -31,27 +30,27 @@ class StackingClassifier(Model):
         kwargs : additional keyword arguments
             Any additional parameters to be passed to the parent Model class.
         """
-        super().__init__(**kwargs)  # Initialize the base Model class
-        self.models = models  # Store the list of models for stacking
+        super().__init__(**kwargs)  
+        self.models = models  
+
 
     def _fit(self, dataset: Dataset) -> 'StackingClassifier':
         """
         Fit each model in the ensemble to the training data.
-
-        Parameters
-        ----------
-        dataset : Dataset
-            The training data used to fit the models.
-
-        Returns
-        -------
-        self : StackingClassifier
-            Returns the fitted StackingClassifier instance.
         """
-        for model in self.models:
-            model.fit(dataset)  # Fit each model on the training data
+        # Create an empty list to hold the predictions
+        all_predictions = []
 
-        return self  # Return the fitted StackingClassifier
+        for model in self.models:
+            model.fit(dataset)  
+            predictions = model.predict(dataset)
+            all_predictions.append(predictions)
+        
+        # Store the predictions in new_dataset
+        self.new_dataset = np.column_stack(all_predictions)
+
+        return self
+            
 
     def _predict(self, dataset: Dataset) -> np.ndarray:
         """
@@ -68,7 +67,6 @@ class StackingClassifier(Model):
             The predicted class labels for the input data.
         """
         
-        # Helper function to compute the majority vote from predictions
         def _get_majority_vote(pred: np.ndarray) -> int:
             """
             Calculate the majority vote from an array of predictions.
@@ -85,7 +83,7 @@ class StackingClassifier(Model):
             """
             # Get unique labels and their counts
             labels, counts = np.unique(pred, return_counts=True)
-            return labels[np.argmax(counts)]  # Return the label with the highest count
+            return labels[np.argmax(counts)] 
 
         # Collect predictions from each model and transpose the results
         predictions = np.array([model.predict(dataset) for model in self.models]).transpose()
@@ -108,33 +106,38 @@ class StackingClassifier(Model):
         score : float
             The accuracy score of the predictions.
         """
-        return accuracy(dataset.y, predictions)  # Calculate and return the accuracy
+        return accuracy(dataset.y, predictions)  
 
 
 if __name__ == '__main__':
-    # Import necessary components for dataset handling and model training
-    from si.data.dataset import Dataset
-    from si.model_selection.split import train_test_split
+    from si.io.csv_file import read_csv
+    from si.model_selection.split import stratified_train_test_split
     from si.models.knn_classifier import KNNClassifier
     from si.models.logistic_regression import LogisticRegression
+    from si.models.decision_tree_classifier import DecisionTreeClassifier
 
-    # Load a random dataset and split it into training and testing sets
-    dataset_ = Dataset.from_random(600, 100, 2)  # Generate a random dataset with 600 samples
-    dataset_train, dataset_test = train_test_split(dataset_, test_size=0.2)  # Split the dataset into 80% train and 20% test
+    filename = "C:\\Users\\tiago\\OneDrive\\Documentos\\GitHub\\si\\datasets\\breast_bin\\breast-bin.csv"
+    breast = read_csv(filename, sep=",", features=True, label=True)
+    train_dataset, test_dataset = stratified_train_test_split(breast, test_size=0.20, random_state=42)
 
-    # Initialize KNN and Logistic Regression classifiers
-    knn = KNNClassifier(k=3)  # Create a KNN classifier with k=3
-    lg = LogisticRegression(l2_penalty=1, alpha=0.001, max_iter=1000)  # Create a Logistic Regression model
+    # Initialize the base models
+    knn1 = KNNClassifier(k=3)
+    logreg = LogisticRegression(l2_penalty=1, alpha=0.001, max_iter=1000)
+    dtree = DecisionTreeClassifier()
 
-    # Initialize the StackingClassifier with the individual models
-    stacking = StackingClassifier([knn, lg])
+    # Initialize the final model
+    knn2 = KNNClassifier(k=3)
 
-    # Fit the StackingClassifier on the training dataset
-    stacking.fit(dataset_train)
+    # Initialize the StackingClassifier with the base models and final model
+    stacking = StackingClassifier(models=[knn1, logreg, dtree], final_model=knn2)
 
-    # Compute and print the score (accuracy) of the model on the test set
-    score = stacking.score(dataset_test)
-    print(f"Score: {score}")
+    # Train the StackingClassifier model
+    stacking.fit(train_dataset)
 
-    # Print the predictions for the test dataset
-    print(stacking.predict(dataset_test))
+    # Compute the score on the test dataset
+    score = stacking.score(test_dataset)
+    print(f"StackingClassifier Score: {score}")
+
+    # Get predictions on the test dataset
+    predictions = stacking.predict(test_dataset)
+    print("Predictions:", predictions)

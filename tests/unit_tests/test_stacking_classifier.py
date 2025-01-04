@@ -1,44 +1,90 @@
-import unittest
-import numpy as np
+import os
+from unittest import TestCase
 from si.data.dataset import Dataset
 from si.ensemble.stacking_classifier import StackingClassifier
 from si.models.knn_classifier import KNNClassifier
 from si.models.logistic_regression import LogisticRegression
-from si.model_selection.split import train_test_split
+from si.models.decision_tree_classifier import DecisionTreeClassifier
+from si.model_selection.split import stratified_train_test_split
+from si.io.data_file import read_data_file
+from si.metrics.accuracy import accuracy
 
-class TestStackingClassifier(unittest.TestCase):
+
+class TestStackingClassifier(TestCase):
+
     def setUp(self):
-        # Create a random dataset
-        self.dataset = Dataset.from_random(600, 100, 2)
-        self.dataset_train, self.dataset_test = train_test_split(self.dataset, test_size=0.2)
+        """
+        Set up the environment for tests by loading the dataset
+        and splitting it into training and testing sets.
+        """
+        self.csv_file = "C:\\Users\\tiago\\OneDrive\\Documentos\\GitHub\\si\\datasets\\breast_bin\\breast-bin.csv"
 
-        # Initialize individual models
-        self.knn = KNNClassifier(k=3)
-        self.lg = LogisticRegression(l2_penalty=1, alpha=0.001, max_iter=1000)
+        # Ensure the dataset file exists and load it
+        if not os.path.exists(self.csv_file):
+            raise FileNotFoundError(f"Dataset file not found at {self.csv_file}")
+        self.dataset = read_data_file(filename=self.csv_file, label=True, sep=",")
 
-        # Initialize the StackingClassifier with the individual models
-        self.stacking = StackingClassifier([self.knn, self.lg])
+        # Split the dataset into training and testing sets
+        self.train_dataset, self.test_dataset = stratified_train_test_split(self.dataset, test_size=0.3)
+
+        # Initialize base models and final model
+        knn = KNNClassifier()
+        logistic_regression = LogisticRegression()
+        decision_tree = DecisionTreeClassifier()
+        knn_final = KNNClassifier()
+
+        # Create the StackingClassifier
+        self.stacking_classifier = StackingClassifier(
+            models=[knn, logistic_regression, decision_tree], final_model=knn_final
+        )
 
     def test_fit(self):
-        # Test fitting the StackingClassifier
-        self.stacking.fit(self.dataset_train)
-        for model in self.stacking.models:
-            self.assertTrue(hasattr(model, 'is_fitted'))
-            self.assertTrue(model.is_fitted)
+        """
+        Test the `fit` method of StackingClassifier to ensure that the models
+        are correctly trained and the new dataset (new_dataset) is created properly.
+        """
+        # Fit the StackingClassifier with the training set
+        self.stacking_classifier.fit(self.train_dataset)
+
+        # Assertions to validate the new dataset's shape
+        if hasattr(self.stacking_classifier, "new_dataset"):
+            # Check if the new dataset is a numpy array and validate its shape
+            new_dataset_shape = self.stacking_classifier.new_dataset.shape
+            train_dataset_shape = self.train_dataset.X.shape
+
+            # Ensure the number of rows matches and the number of models matches the columns
+            self.assertEqual(new_dataset_shape[0], train_dataset_shape[0])
+            self.assertEqual(len(self.stacking_classifier.models), new_dataset_shape[1])
+        else:
+            raise AttributeError("The `new_dataset` attribute is missing in the StackingClassifier after fitting.")
 
     def test_predict(self):
-        # Test predicting with the StackingClassifier
-        self.stacking.fit(self.dataset_train)
-        predictions = self.stacking.predict(self.dataset_test)
-        self.assertEqual(len(predictions), len(self.dataset_test.y))
-        self.assertTrue(np.all(np.isin(predictions, np.unique(self.dataset.y))))
+        """
+        Test the `predict` method to ensure that predictions have the
+        correct shape with respect to the test dataset.
+        """
+        # Fit the StackingClassifier
+        self.stacking_classifier.fit(self.train_dataset)
+
+        # Generate predictions
+        predictions = self.stacking_classifier.predict(self.test_dataset)
+
+        # Ensure predictions and test dataset have `shape` accessible
+        self.assertEqual(predictions.shape[0], self.test_dataset.X.shape[0])
 
     def test_score(self):
-        # Test scoring the StackingClassifier
-        self.stacking.fit(self.dataset_train)
-        score = self.stacking.score(self.dataset_test)
-        self.assertGreaterEqual(score, 0)
-        self.assertLessEqual(score, 1)
+        """
+        Test the `score` method to ensure that the accuracy calculated
+        matches the expected accuracy using the accuracy metric function.
+        """
+        # Fit the StackingClassifier
+        self.stacking_classifier.fit(self.train_dataset)
 
-if __name__ == '__main__':
-    unittest.main()
+        # Calculate the accuracy score
+        accuracy_ = self.stacking_classifier.score(self.test_dataset)
+
+        # Expected accuracy based on actual labels and predictions
+        expected_accuracy = accuracy(self.test_dataset.y, self.stacking_classifier.predict(self.test_dataset))
+
+        # Compare the predicted accuracy and expected accuracy rounded with 2 decimal places
+        self.assertEqual(round(accuracy_, 2), round(expected_accuracy, 2))

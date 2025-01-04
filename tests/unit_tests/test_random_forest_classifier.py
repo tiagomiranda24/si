@@ -28,7 +28,7 @@ class TestRandomForestClassifier(TestCase):
         # Verify that the parameters are correctly set
         self.assertEqual(random_forest_classifier.min_sample_split, 2)
         self.assertEqual(random_forest_classifier.max_depth, 10)
-        self.assertEqual(len(random_forest_classifier.trees), 10)  # Ensure that 10 trees were created
+        self.assertEqual(len(random_forest_classifier.trees), 10)  
 
     def test_predict(self):
         """
