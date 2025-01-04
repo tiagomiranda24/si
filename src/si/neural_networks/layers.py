@@ -229,4 +229,3 @@ class DropoutLayer(Layer):
             The number of parameters of the layer (always 0).
         """
         return 0
-   
