@@ -42,7 +42,7 @@ class SelectPercentile(Transformer):
         
         super().__init__(**kwargs)
         
-        # Adicionando validação para o percentil
+        # Adding validation for the percentile
         if not (0 < percentile <= 100):
             raise ValueError("percentile must be in the range (0, 100].")
         
