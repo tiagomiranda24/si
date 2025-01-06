@@ -1,6 +1,6 @@
 import numpy as np
 from unittest import TestCase
-from si.neural_networks.layers import Dropout
+from si.neural_networks.layers import DropoutLayer as Dropout
 
 class TestDropoutLayer(TestCase):
     def setUp(self):

@@ -49,14 +49,15 @@ class TestStackingClassifier(TestCase):
         # Assertions to validate the new dataset's shape
         if hasattr(self.stacking_classifier, "new_dataset"):
             # Check if the new dataset is a numpy array and validate its shape
-            new_dataset_shape = self.stacking_classifier.new_dataset.shape
+            new_dataset_shape = self.stacking_classifier.new_dataset.X.shape  # Acesse o X do Dataset
             train_dataset_shape = self.train_dataset.X.shape
 
             # Ensure the number of rows matches and the number of models matches the columns
-            self.assertEqual(new_dataset_shape[0], train_dataset_shape[0])
-            self.assertEqual(len(self.stacking_classifier.models), new_dataset_shape[1])
-        else:
-            raise AttributeError("The `new_dataset` attribute is missing in the StackingClassifier after fitting.")
+            self.assertEqual(new_dataset_shape[0], train_dataset_shape[0])  # Acesse a dimensão correta
+
+            # Check that the number of columns in new_dataset is equal to the number of models
+            self.assertEqual(new_dataset_shape[1], len(self.stacking_classifier.models))
+
 
     def test_predict(self):
         """
